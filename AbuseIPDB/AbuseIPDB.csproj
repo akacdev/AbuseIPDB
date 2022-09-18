@@ -30,7 +30,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="icon.png">
+    <None Update="icon.svg">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
