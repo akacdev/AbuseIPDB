@@ -1,6 +1,6 @@
 ﻿# AbuseIPDB ⛔
 
-![](https://raw.githubusercontent.com/actually-akac/AbuseIPDB/master/AbuseIPDB/icon.png)
+![](https://raw.githubusercontent.com/actually-akac/AbuseIPDB/master/AbuseIPDB/icon.svg)
 
 An async C# library for interacting with the v2 AbuseIPDB API.
 
