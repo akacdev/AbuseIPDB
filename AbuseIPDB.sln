@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AbuseIPDB", "AbuseIPDB\AbuseIPDB.csproj", "{F698B6BD-45E8-405F-86DC-7095B2941AE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{2D45B0E5-DF72-4D30-ADE6-78CB5B2FBB08}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F698B6BD-45E8-405F-86DC-7095B2941AE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F698B6BD-45E8-405F-86DC-7095B2941AE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F698B6BD-45E8-405F-86DC-7095B2941AE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F698B6BD-45E8-405F-86DC-7095B2941AE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D45B0E5-DF72-4D30-ADE6-78CB5B2FBB08}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D45B0E5-DF72-4D30-ADE6-78CB5B2FBB08}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D45B0E5-DF72-4D30-ADE6-78CB5B2FBB08}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D45B0E5-DF72-4D30-ADE6-78CB5B2FBB08}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E6F2345A-7A5A-4FDC-90DA-FAD871591514}
+	EndGlobalSection
+EndGlobal
