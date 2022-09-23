@@ -35,17 +35,17 @@ AbuseIPDBClient client = new("API KEY");
 
 ### Checking an IP
 ```csharp
-IpCheckResult check = await client.Check("1.1.1.1", true, 90);
+CheckedIp check = await client.Check("1.1.1.1", true, 90);
 ```
 
 ### Reporting an abusive IP
 ```csharp
-IpReportResult report = await client.Report("127.0.0.1", new IpReportCategory[] { IpReportCategory.WebSpam, IpReportCategory.SSH }, "Test Report");
+ReportedIp report = await client.Report("127.0.0.1", new IpReportCategory[] { IpReportCategory.WebSpam, IpReportCategory.SSH }, "Test Report");
 ```
 
 ### Bulk-reporting many IPs at once
 ```csharp
-BulkReportResult bulkReport = await client.BulkReport(stream);
+BulkReport bulkReport = await client.BulkReport(stream);
 ```
 
 ### Requesting reports for an IP
@@ -60,21 +60,21 @@ BlacklistedIp[] ips = await client.GetBlacklist(10000);
 
 ### Checking a CIDR block for recently reported IPs
 ```csharp
-CheckBlockResult checkBlock = await client.CheckBlock("186.2.163.0/24", 30);
+CheckedBlock checkBlock = await client.CheckBlock("186.2.163.0/24", 30);
 ```
 
 ### Clearing reports on an IP
 ```csharp
-ClearAddressResult clearAddress = await client.ClearAddress("127.0.0.1");
+ClearedAddress clearAddress = await client.ClearAddress("127.0.0.1");
 ```
 
 ## Available methods
 - Task\<BlacklistedIp[]> GetBlacklist(int limit = 10000, int? confidenceMinimum = null, string[] onlyCountries = null, string[] exceptCountries = null)
-- Task\<BulkReportResult> BulkReport(Stream csvStream)
-- Task\<CheckBlockResult> CheckBlock(string network, int maxAge)
-- Task\<ClearAddressResult> ClearAddress(string ip)
-- Task\<IpCheckResult> Check(string ip, bool verbose = true, int maxAge = 90)
-- Task\<IpReportResult> Report(string ip, IpReportCategory[] categories, string comment)
+- Task\<BulkReport> BulkReport(Stream csvStream)
+- Task\<CheckedBlock> CheckBlock(string network, int maxAge)
+- Task\<ClearedAddress> ClearAddress(string ip)
+- Task\<CheckedIp> Check(string ip, bool verbose = true, int maxAge = 90)
+- Task\<ReportedIp> Report(string ip, IpReportCategory[] categories, string comment)
 - Task\<IpReport[]> GetReports(string ip, int limit = 100, int maxAge = 90)
 
 ## Resources

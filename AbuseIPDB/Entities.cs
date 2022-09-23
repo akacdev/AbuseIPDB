@@ -10,18 +10,22 @@ namespace AbuseIPDB
     {
         /// <summary>
         /// IP address is involved in: DNS Compromise
+        /// <para><b>AbuseIPDB Definition:</b> Altering DNS records resulting in improper redirection.</para>
         /// </summary>
         DNSCompromise = 1,
         /// <summary>
         /// IP address is involved in: DNS Poisoning
+        /// <para><b>AbuseIPDB Definition:</b>  Falsifying domain server cache (cache poisoning).</para>
         /// </summary>
         DNSpoisoning = 2,
         /// <summary>
         /// IP address is involved in: Fraud Orders
+        /// <para><b>AbuseIPDB Definition:</b> Fraudulent orders.</para>
         /// </summary>
         FraudOrders = 3,
         /// <summary>
         /// IP address is involved in: DDoS Attack
+        /// <para><b>AbuseIPDB Definition:</b> Participating in distributed denial-of-service (usually part of botnet).</para>
         /// </summary>
         DDoSAttack = 4,
         /// <summary>
@@ -30,10 +34,12 @@ namespace AbuseIPDB
         FTPBruteForce = 5,
         /// <summary>
         /// IP address is involved in: Ping of Death
+        /// <para><b>AbuseIPDB Definition:</b> Oversized IP packet.</para>
         /// </summary>
         PingOfDeath = 6,
         /// <summary>
         /// IP address is involved in: Phishing
+        /// <para><b>AbuseIPDB Definition:</b> Phishing websites and/or email.</para>
         /// </summary>
         Phishing = 7,
         /// <summary>
@@ -42,26 +48,32 @@ namespace AbuseIPDB
         FraudVoIP = 8,
         /// <summary>
         /// IP address is involved in: Open Proxy
+        /// <para><b>AbuseIPDB Definition:</b> Open proxy, open relay, or Tor exit node.</para>
         /// </summary>
         OpenProxy = 9,
         /// <summary>
         /// IP address is involved in: Web Spam
+        /// <para><b>AbuseIPDB Definition:</b> Comment/forum spam, HTTP referer spam, or other CMS spam.</para>
         /// </summary>
         WebSpam = 10,
         /// <summary>
         /// IP address is involved in: Email Spam
+        /// <para><b>AbuseIPDB Definition:</b> Spam email content, infected attachments, and phishing emails.</para>
         /// </summary>
         EmailSpam = 11,
         /// <summary>
         /// IP address is involved in: Blog Spam
+        /// <para><b>AbuseIPDB Definition:</b> CMS blog comment spam.</para>
         /// </summary>
         BlogSpam = 12,
         /// <summary>
-        /// IP address is involved in: VPN Hosting
+        /// IP address is involved in: VPN IP
+        /// <para><b>AbuseIPDB Definition:</b> Conjunctive category.</para>
         /// </summary>
         VPN = 13,
         /// <summary>
         /// IP address is involved in: Port Scan
+        /// <para><b>AbuseIPDB Definition:</b> Scanning for open ports and vulnerable services.</para>
         /// </summary>
         PortScan = 14,
         /// <summary>
@@ -70,34 +82,42 @@ namespace AbuseIPDB
         Hacking = 15,
         /// <summary>
         /// IP address is involved in: SQL Injection
+        /// <para><b>AbuseIPDB Definition:</b> Attempts at SQL injection.</para>
         /// </summary>
         SQLInjection = 16,
         /// <summary>
         /// IP address is involved in: Spoofing
+        /// <para><b>AbuseIPDB Definition:</b> Email sender spoofing.</para>
         /// </summary>
         Spoofing = 17,
         /// <summary>
         /// IP address is involved in: Brute Force
+        /// <para><b>AbuseIPDB Definition:</b> Credential brute-force attacks on webpage logins and services like SSH, FTP, SIP, SMTP, RDP, etc. This category is seperate from DDoS attacks.</para>
         /// </summary>
         BruteForce = 18,
         /// <summary>
         /// IP address is involved in: Bad Web Bot
+        /// <para><b>AbuseIPDB Definition:</b> Webpage scraping (for email addresses, content, etc) and crawlers that do not honor robots.txt. Excessive requests and user agent spoofing can also be reported here.</para>
         /// </summary>
         BadWebBot = 19,
         /// <summary>
         /// IP address is involved in: Exploited Host
+        /// <para><b>AbuseIPDB Definition:</b> Host is likely infected with malware and being used for other attacks or to host malicious content. The host owner may not be aware of the compromise. This category is often used in combination with other attack categories.</para>
         /// </summary>
         ExploitedHost = 20,
         /// <summary>
         /// IP address is involved in: Web App Attack
+        /// <para><b>AbuseIPDB Definition:</b> Attempts to probe for or exploit installed web applications such as a CMS like WordPress/Drupal, e-commerce solutions, forum software, phpMyAdmin and various other software plugins/solutions.</para>
         /// </summary>
         WebAppAttack = 21,
         /// <summary>
         /// IP address is involved in: SSH Brute-Forcé
+        /// <para><b>AbuseIPDB Definition:</b> Secure Shell (SSH) abuse. Use this category in combination with more specific categories.</para>
         /// </summary>
         SSH = 22,
         /// <summary>
         /// IP address is involved in: IoT Targeted
+        /// <para><b>AbuseIPDB Definition:</b> Abuse was targeted at an "Internet of Things" type device. Include information about what type of device was targeted in the comments.</para>
         /// </summary>
         IoTTargeted = 23
     }
@@ -155,7 +175,7 @@ namespace AbuseIPDB
     /// <summary>
     /// The result of a clear address request.
     /// </summary>
-    public class ClearAddressResult
+    public class ClearedAddress
     {
         /// <summary>
         /// How many reports were deleted.
@@ -165,12 +185,12 @@ namespace AbuseIPDB
     }
 
     /// <summary>
-    /// A container for <see cref="ClearAddressResult"/>.
+    /// A container for <see cref="ClearedAddress"/>.
     /// </summary>
-    public class ClearAddressContainer
+    public class ClearedAddressContainer
     {
         [JsonPropertyName("data")]
-        public ClearAddressResult Data { get; set; }
+        public ClearedAddress Data { get; set; }
     }
 
     /// <summary>
@@ -200,7 +220,7 @@ namespace AbuseIPDB
     /// <summary>
     /// The result of a bulk report request.
     /// </summary>
-    public class BulkReportResult
+    public class BulkReport
     {
         /// <summary>
         /// How many requests were successfully saved.
@@ -216,18 +236,18 @@ namespace AbuseIPDB
     }
 
     /// <summary>
-    /// A container for <see cref="BulkReportResult"/>.
+    /// A container for <see cref="BulkReport"/>.
     /// </summary>
     public class BulkReportContainer
     {
         [JsonPropertyName("data")]
-        public BulkReportResult Data { get; set; }
+        public BulkReport Data { get; set; }
     }
 
     /// <summary>
     /// A reported IP address
     /// </summary>
-    public class CheckBlockReportedIp
+    public class CheckedBlockIp
     {
         /// <summary>
         /// The IP address that was reported.
@@ -263,7 +283,7 @@ namespace AbuseIPDB
     /// <summary>
     /// The result of a check block request.
     /// </summary>
-    public class CheckBlockResult
+    public class CheckedBlock
     {
         /// <summary>
         /// The network address, example: <c>186.2.163.0</c>.
@@ -302,19 +322,19 @@ namespace AbuseIPDB
         public string AddressSpace { get; set; }
 
         /// <summary>
-        /// An array of <see cref="CheckBlockReportedIp"/> with all recently reported IP addresses in this network.
+        /// An array of <see cref="CheckedBlockIp"/> with all recently reported IP addresses in this network.
         /// </summary>
         [JsonPropertyName("reportedAddress")]
-        public CheckBlockReportedIp[] ReportedIps { get; set; }
+        public CheckedBlockIp[] ReportedIps { get; set; }
     }
 
     /// <summary>
-    /// A container for <see cref="CheckBlockResult"/>.
+    /// A container for <see cref="CheckedBlock"/>.
     /// </summary>
-    public class CheckBlockContainer
+    public class CheckedBlockContainer
     {
         [JsonPropertyName("data")]
-        public CheckBlockResult Data { get; set; }
+        public CheckedBlock Data { get; set; }
     }
 
     /// <summary>
@@ -344,7 +364,7 @@ namespace AbuseIPDB
     /// <summary>
     /// The result of an IP reporting request.
     /// </summary>
-    public class IpReportResult
+    public class ReportedIp
     {
         /// <summary>
         /// The IP address that has just been reported.
@@ -360,12 +380,12 @@ namespace AbuseIPDB
     }
 
     /// <summary>
-    /// A container for <see cref="IpReportResult"/>.
+    /// A container for <see cref="ReportedIp"/>.
     /// </summary>
-    public class IpReportContainer
+    public class ReportedIpContainer
     {
         [JsonPropertyName("data")]
-        public IpReportResult Data { get; set; }
+        public ReportedIp Data { get; set; }
     }
 
     /// <summary>
@@ -488,7 +508,7 @@ namespace AbuseIPDB
     /// <summary>
     /// A result of an IP check request.
     /// </summary>
-    public class IpCheckResult
+    public class CheckedIp
     {
         /// <summary>
         /// The IP address that's being checked.
@@ -629,11 +649,11 @@ namespace AbuseIPDB
     }
 
     /// <summary>
-    /// A container for <see cref="IpCheckResult"></see>.
+    /// A container for <see cref="CheckedIp"></see>.
     /// </summary>
-    public class IpCheckContainer
+    public class CheckedIpContainer
     {
         [JsonPropertyName("data")]
-        public IpCheckResult Data { get; set; }
+        public CheckedIp Data { get; set; }
     }
 }

@@ -18,7 +18,7 @@ namespace Example
             AbuseIPDBClient client = new(key);
 
             Console.WriteLine($"> Checking IP address");
-            IpCheckResult check = await client.Check("1.1.1.1", true, 90);
+            CheckedIp check = await client.Check("1.1.1.1", true, 90);
 
             Console.WriteLine($"IP: {check.IpAddress}");
             Console.WriteLine($"Is Public: {check.IsPublic}");
@@ -59,7 +59,7 @@ namespace Example
             Console.WriteLine();
             Console.WriteLine($"> Reporting an IP address");
 
-            IpReportResult report;
+            ReportedIp report;
             try
             {
                 report = await client.Report("127.0.0.1", new IpReportCategory[] { IpReportCategory.WebSpam, IpReportCategory.SSH }, "Test Report");
@@ -92,7 +92,8 @@ namespace Example
 
             Console.WriteLine();
             Console.WriteLine($"> Checking a CIDR block for recently reported IP addresses");
-            CheckBlockResult checkBlock = await client.CheckBlock("186.2.163.0/24", 30);
+            CheckedBlock checkBlock = await client.CheckBlock("186.2.163.0/24", 30);
+
             Console.WriteLine($"Network Address: {checkBlock.NetworkAddress}");
             Console.WriteLine($"Netmask: {checkBlock.Netmask}");
             Console.WriteLine($"Range: {checkBlock.MinAddress} - {checkBlock.MaxAddress}");
@@ -102,7 +103,7 @@ namespace Example
             Console.WriteLine($"Reported Addresses: {checkBlock.ReportedIps.Length}");
             for (int i = 0; i < checkBlock.ReportedIps.Length; i++)
             {
-                CheckBlockReportedIp ip = checkBlock.ReportedIps[i];
+                CheckedBlockIp ip = checkBlock.ReportedIps[i];
                 Console.WriteLine($"[#{i + 1}] - {ip.IpAddress} with {ip.AbuseConfidence}% abuse confidence");
             }
 
@@ -120,7 +121,7 @@ namespace Example
                 "\n127.0.0.5,\"4,5,7\",2022-09-17T00:00:00+0000,\"Test Bulk-Report\"";
 
             MemoryStream stream = new(Encoding.UTF8.GetBytes(csv));
-            BulkReportResult bulkReport = await client.BulkReport(stream);
+            BulkReport bulkReport = await client.BulkReport(stream);
 
             Console.WriteLine($"Successfully bulk-reported IPs, saved reports: {bulkReport.SavedReports}");
             Console.WriteLine($"Invalid reports: {bulkReport.InvalidReports.Length}");
@@ -138,7 +139,7 @@ namespace Example
             int reportsDeleted = 0;
             for (int i = 1; i <= 5; i++)
             {
-                ClearAddressResult clearAddress = await client.ClearAddress($"127.0.0.{i}");
+                ClearedAddress clearAddress = await client.ClearAddress($"127.0.0.{i}");
                 reportsDeleted += clearAddress.ReportsDeleted;
             }
 
