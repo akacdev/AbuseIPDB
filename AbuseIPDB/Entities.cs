@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Net.Http;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace AbuseIPDB
 {
     /// <summary>
     /// A category for IP address reports.
     /// </summary>
-    public enum IpReportCategory
+    public enum IPReportCategory
     {
         /// <summary>
         /// IP address is involved in: DNS Compromise
@@ -120,6 +122,37 @@ namespace AbuseIPDB
         /// <para><b>AbuseIPDB Definition:</b> Abuse was targeted at an "Internet of Things" type device. Include information about what type of device was targeted in the comments.</para>
         /// </summary>
         IoTTargeted = 23
+    }
+
+    /// <summary>
+    /// Provides basic configuration options when initialising creating a client.
+    /// </summary>
+    public class AbuseIPDBClientConfig
+    {
+        /// <summary>
+        /// An alternative way of setting your API key.
+        /// </summary>
+        public string Key { get; set; }
+
+        /// <summary>
+        /// Specify the custom endpoint to request when reporting an IP address.
+        /// </summary>
+        public string ReportEndpoint { get; set; }
+
+        /// <summary>
+        /// Allows you to create a custom converter which takes in a HTTP response object and de-serializes into a <see cref="ReportedIP"/> object.
+        /// </summary>
+        public Func<HttpResponseMessage, Task<ReportedIP>> CustomReportResponseConverter { get; set; } = null;
+
+        /// <summary>
+        /// Specify the custom endpoint to request when bulk-reporting IP addresses.
+        /// </summary>
+        public string BulkReportEndpoint { get; set; }
+
+        /// <summary>
+        /// Allows you to create a custom converter which takes in a HTTP response object and de-serializes into a <see cref="BulkReport"/> object.
+        /// </summary>
+        public Func<HttpResponseMessage, Task<BulkReport>> CustomBulkReportResponseConverter { get; set; } = null;
     }
 
     /// <summary>
@@ -247,13 +280,13 @@ namespace AbuseIPDB
     /// <summary>
     /// A reported IP address
     /// </summary>
-    public class CheckedBlockIp
+    public class CheckBlockIP
     {
         /// <summary>
         /// The IP address that was reported.
         /// </summary>
         [JsonPropertyName("ipAddress")]
-        public string IpAddress { get; set; }
+        public string IPAddress { get; set; }
 
         /// <summary>
         /// How many reports this IP address has.
@@ -322,10 +355,10 @@ namespace AbuseIPDB
         public string AddressSpace { get; set; }
 
         /// <summary>
-        /// An array of <see cref="CheckedBlockIp"/> with all recently reported IP addresses in this network.
+        /// An array of <see cref="CheckBlockIP"/> with all recently reported IP addresses in this network.
         /// </summary>
         [JsonPropertyName("reportedAddress")]
-        public CheckedBlockIp[] ReportedIps { get; set; }
+        public CheckBlockIP[] ReportedIPs { get; set; }
     }
 
     /// <summary>
@@ -340,13 +373,13 @@ namespace AbuseIPDB
     /// <summary>
     /// A payload for submitting an IP address report.
     /// </summary>
-    public class IpReportPayload
+    public class IPReportParameters
     {
         /// <summary>
         /// The IP address to report.
         /// </summary>
         [JsonPropertyName("ip")]
-        public string IpAddress { get; set; }
+        public string IPAddress { get; set; }
 
         /// <summary>
         /// A comma separated string with IDs of matching abuse categories.
@@ -364,13 +397,13 @@ namespace AbuseIPDB
     /// <summary>
     /// The result of an IP reporting request.
     /// </summary>
-    public class ReportedIp
+    public class ReportedIP
     {
         /// <summary>
         /// The IP address that has just been reported.
         /// </summary>
         [JsonPropertyName("ipAddress")]
-        public string IpAddress { get; set; }
+        public string IPAddress { get; set; }
 
         /// <summary>
         /// The newly calculated IP address abuse confidence score as percentage.
@@ -380,24 +413,24 @@ namespace AbuseIPDB
     }
 
     /// <summary>
-    /// A container for <see cref="ReportedIp"/>.
+    /// A container for <see cref="ReportedIP"/>.
     /// </summary>
-    public class ReportedIpContainer
+    public class ReportedIPContainer
     {
         [JsonPropertyName("data")]
-        public ReportedIp Data { get; set; }
+        public ReportedIP Data { get; set; }
     }
 
     /// <summary>
     /// A blacklisted IP address.
     /// </summary>
-    public class BlacklistedIp
+    public class BlacklistedIP
     {
         /// <summary>
         /// The blacklisted IP address.
         /// </summary>
         [JsonPropertyName("ipAddress")]
-        public string IpAddress { get; set; }
+        public string IPAddress { get; set; }
 
         /// <summary>
         /// The <c>ISO 3166 alpha-2</c> country code where this IP address is located.
@@ -431,7 +464,7 @@ namespace AbuseIPDB
     }
 
     /// <summary>
-    /// A container for <see cref="BlacklistMeta"/> and <see cref="BlacklistedIp"/>.
+    /// A container for <see cref="BlacklistMeta"/> and <see cref="BlacklistedIP"/>.
     /// </summary>
     public class BlacklistContainer
     {
@@ -439,13 +472,13 @@ namespace AbuseIPDB
         public BlacklistMeta Meta { get; set; }
 
         [JsonPropertyName("data")]
-        public BlacklistedIp[] Data { get; set; }
+        public BlacklistedIP[] Data { get; set; }
     }
 
     /// <summary>
     /// A page of reports for an IP address.
     /// </summary>
-    public class IpReportsPage
+    public class IPReportsPage
     {
         /// <summary>
         /// How many reports there are in total.
@@ -490,31 +523,31 @@ namespace AbuseIPDB
         public string PreviousPageUrl { get; set; }
 
         /// <summary>
-        /// An <see cref="IpReport"/> array with the data for this page.
+        /// An <see cref="IPReport"/> array with the data for this page.
         /// </summary>
         [JsonPropertyName("results")]
-        public IpReport[] Results { get; set; }
+        public IPReport[] Results { get; set; }
     }
 
     /// <summary>
-    /// A container for <see cref="IpReportsPage"/>.
+    /// A container for <see cref="IPReportsPage"/>.
     /// </summary>
-    public class IpReportsContainer
+    public class IPReportsContainer
     {
         [JsonPropertyName("data")]
-        public IpReportsPage Data { get; set; }
+        public IPReportsPage Data { get; set; }
     }
 
     /// <summary>
     /// A result of an IP check request.
     /// </summary>
-    public class CheckedIp
+    public class CheckedIP
     {
         /// <summary>
         /// The IP address that's being checked.
         /// </summary>
         [JsonPropertyName("ipAddress")]
-        public string IpAddress { get; set; }
+        public string IPAddress { get; set; }
 
         /// <summary>
         /// Whether this is a public or private IP address.
@@ -526,7 +559,7 @@ namespace AbuseIPDB
         /// The version of this IP address (4/6).
         /// </summary>
         [JsonPropertyName("ipVersion")]
-        public int IpVersion { get; set; }
+        public int IPVersion { get; set; }
 
         /// <summary>
         /// <para>Whether this is a whitelisted IP address.</para>
@@ -599,16 +632,16 @@ namespace AbuseIPDB
         public DateTime LastReportedAt { get; set; }
 
         /// <summary>
-        /// An array of <see cref="IpReport"/> containing the recent reports for this IP address. You can also use the <see cref="AbuseIPDBClient"/><c>.GetReports()</c> method.
+        /// An array of <see cref="IPReport"/> containing the recent reports for this IP address. You can also use the <see cref="AbuseIPDBClient"/><c>.GetReports()</c> method.
         /// </summary>
         [JsonPropertyName("reports")]
-        public IpReport[] Reports { get; set; }
+        public IPReport[] Reports { get; set; }
     }
 
     /// <summary>
     /// An IP address report.
     /// </summary>
-    public class IpReport
+    public class IPReport
     {
         /// <summary>
         /// When was this report submitted.
@@ -626,11 +659,11 @@ namespace AbuseIPDB
         /// The report categories for the abusive activity.
         /// </summary>
         [JsonPropertyName("categories")]
-        public IpReportCategory[] Categories { get; set; }
+        public IPReportCategory[] Categories { get; set; }
 
         /// <summary>
         /// The ID of the reporter.<br/>
-        /// You can view their profile by going to <a href="https://www.abuseipdb.com/user/">https://www.abuseipdb.com/user/</a> and appending the user ID.
+        /// You can view their profile by going to <a href="https://www.abuseipdb.com/user/"></a> and appending the user ID.
         /// </summary>
         [JsonPropertyName("reporterId")]
         public int ReporterId { get; set; }
@@ -649,11 +682,11 @@ namespace AbuseIPDB
     }
 
     /// <summary>
-    /// A container for <see cref="CheckedIp"></see>.
+    /// A container for <see cref="CheckedIP"></see>.
     /// </summary>
-    public class CheckedIpContainer
+    public class CheckedIPContainer
     {
         [JsonPropertyName("data")]
-        public CheckedIp Data { get; set; }
+        public CheckedIP Data { get; set; }
     }
 }

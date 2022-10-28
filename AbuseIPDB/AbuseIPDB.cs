@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -27,8 +26,10 @@ namespace AbuseIPDB
         /// Base URI to send requests to.
         /// </summary>
         public static readonly Uri BaseUri = new(BaseUrl);
-
-        private readonly string Key;
+        /// <summary>
+        /// The HTTP version number to use when sending requests.
+        /// </summary>
+        public static readonly Version HttpVersion = new(2, 0);
 
         private readonly HttpClientHandler HttpHandler = new()
         {
@@ -37,26 +38,54 @@ namespace AbuseIPDB
 
         private readonly HttpClient Client;
 
+        private readonly AbuseIPDBClientConfig Config;
+
         /// <summary>
-        /// Create a new instance of the client for interacting with the main API.
+        /// Create a new instance of the client for interacting with the API.
         /// </summary>
-        /// <param name="key">Your AbuseIPDB API key. You can create one at <a href="https://www.abuseipdb.com/account/api">https://www.abuseipdb.com/account/api</a>.</param>
+        /// <param name="key">Your AbuseIPDB API key. You can create one at <a href="https://www.abuseipdb.com/account/api"></a>.</param>
         /// <exception cref="ArgumentNullException"></exception>
         public AbuseIPDBClient(string key)
         {
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key), "An empty or null API Key was provided.");
-            Key = key;
+            Config = new()
+            {
+                Key = key
+            };
+
+            if (string.IsNullOrEmpty(Config.Key)) throw new ArgumentNullException(nameof(key), "An empty or null API Key was provided.");
 
             Client = new(HttpHandler)
             {
-                DefaultRequestVersion = new Version(2, 0),
+                DefaultRequestVersion = HttpVersion
+            };
+
+            InitializeClient();
+        }
+
+        /// <summary>
+        /// Create a new instance of the client for interacting with the API by passing an advanced <see cref="AbuseIPDBClientConfig"/> configuration object.
+        /// </summary>
+        /// <param name="config"></param>
+        public AbuseIPDBClient(AbuseIPDBClientConfig config)
+        {
+            if (config is null) throw new ArgumentNullException(nameof(config), "Client config object is null.");
+            Config = config;
+
+            Client = new(HttpHandler)
+            {
+                DefaultRequestVersion = HttpVersion,
                 BaseAddress = BaseUri
             };
 
+            InitializeClient();
+        }
+
+        private void InitializeClient()
+        {
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
             Client.DefaultRequestHeaders.UserAgent.ParseAdd("AbuseIPDB C# Client - actually-akac/AbuseIPDB");
             Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-            Client.DefaultRequestHeaders.Add("Key", Key);
+            Client.DefaultRequestHeaders.Add("Key", Config.Key);
         }
 
         /// <summary>
@@ -65,21 +94,19 @@ namespace AbuseIPDB
         /// <param name="ip">The IP address to check.</param>
         /// <param name="verbose">When <see langword="true"/>, reports and country names will be includeed in the output.</param>
         /// <param name="maxAge">How old reports, in days, should be considered. Only effective when verbosity is enabled.</param>
-        /// <returns>An instance of <see cref="CheckedIp"/> containing all information about the IP address and optionally the recent reports.</returns>
+        /// <returns>An instance of <see cref="CheckedIP"/> containing all information about the IP address and optionally the recent reports.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<CheckedIp> Check(string ip, bool verbose = true, int maxAge = 90)
+        public async Task<CheckedIP> Check(string ip, bool verbose = true, int maxAge = 90)
         {
             if (string.IsNullOrEmpty(ip)) throw new ArgumentNullException(nameof(ip), "IP address to check is null or empty.");
             if (maxAge <= 0) throw new ArgumentOutOfRangeException(nameof(maxAge), "Max age has to be a positive value.");
 
             HttpResponseMessage res = await Client.Request(
-                $"check?ipAddress={HttpUtility.UrlEncode(ip)}&maxAgeInDays={maxAge}{(verbose ? "&verbose" : "")}",
                 HttpMethod.Get,
-                target: HttpStatusCode.OK);
+                $"check?ipAddress={HttpUtility.UrlEncode(ip)}&maxAgeInDays={maxAge}{(verbose ? "&verbose" : "")}");
 
-            return (await res.Deseralize<CheckedIpContainer>()).Data;
+            return (await res.Deseralize<CheckedIPContainer>()).Data;
         }
-
 
         /// <summary>
         /// Get up to the latest <c>maxReports</c> reports for an IP address.
@@ -87,16 +114,16 @@ namespace AbuseIPDB
         /// <param name="ip">The IP address to get reports for.</param>
         /// <param name="limit">The maximum amount of reports to get.</param>
         /// <param name="maxAge">How old reports, in days, should be considered.</param>
-        /// <returns>An array of <see cref="IpReport"/> containing all requested reports. They are ordered descending by date.</returns>
+        /// <returns>An array of <see cref="IPReport"/> containing all requested reports. They are ordered descending by date.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public async Task<IpReport[]> GetReports(string ip, int limit = 100, int maxAge = 90)
+        public async Task<IPReport[]> GetReports(string ip, int limit = 100, int maxAge = 90)
         {
             if (string.IsNullOrEmpty(ip)) throw new ArgumentNullException(nameof(ip), "IP address to use is null or empty.");
             if (limit <= 0) throw new ArgumentOutOfRangeException(nameof(limit), "Limit has to be a positive value.");
             if (maxAge <= 0) throw new ArgumentOutOfRangeException(nameof(maxAge), "Max age has to be a positive value.");
 
-            List<IpReport> output = new(limit);
+            List<IPReport> output = new(limit);
 
             int pageNumber = 1;
             int perPage = 100;
@@ -105,12 +132,12 @@ namespace AbuseIPDB
             while (next)
             {
                 HttpResponseMessage res = await Client.Request(
-                    $"reports?ipAddress={HttpUtility.UrlEncode(ip)}&maxAgeInDays={maxAge}&page={pageNumber}&perPage={perPage}",
                     HttpMethod.Get,
+                    $"reports?ipAddress={HttpUtility.UrlEncode(ip)}&maxAgeInDays={maxAge}&page={pageNumber}&perPage={perPage}",
                     target: HttpStatusCode.OK
                     );
 
-                IpReportsPage page = (await res.Deseralize<IpReportsContainer>()).Data;
+                IPReportsPage page = (await res.Deseralize<IPReportsContainer>()).Data;
 
                 if ((output.Count + page.Results.Length) <= limit) output.AddRange(page.Results);
                 else output.AddRange(page.Results.Take(limit - output.Count));
@@ -159,9 +186,9 @@ namespace AbuseIPDB
         ///     Note these are formatted as <c>ISO 3166 alpha-2</c> codes.
         /// </param>
         /// 
-        /// <returns>An array of <see cref="BlacklistedIp"/> with all returned blacklisted IP addresses.</returns>
+        /// <returns>An array of <see cref="BlacklistedIP"/> with all returned blacklisted IP addresses.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public async Task<BlacklistedIp[]> GetBlacklist(
+        public async Task<BlacklistedIP[]> GetBlacklist(
             int limit = 10000,
             int? confidenceMinimum = null,
             string[] onlyCountries = null,
@@ -171,13 +198,12 @@ namespace AbuseIPDB
             if (confidenceMinimum.HasValue && (confidenceMinimum.Value < 0 || confidenceMinimum.Value > 100)) throw new ArgumentOutOfRangeException(nameof(confidenceMinimum), "Minimum confidence score has to be a valid percentage value.");
 
             HttpResponseMessage res = await Client.Request(
+                HttpMethod.Get,
                 "blacklist" +
                 $"?limit={limit}" +
                 (!confidenceMinimum.HasValue ? "" : $"&confidenceMinimum={confidenceMinimum.Value}") +
                 (onlyCountries is null ? "" : $"&onlyCountries={string.Join(',', onlyCountries)}") +
-                (exceptCountries is null ? "" : $"&exceptCountries={string.Join(',', exceptCountries)}"),
-                HttpMethod.Get,
-                target: HttpStatusCode.OK);
+                (exceptCountries is null ? "" : $"&exceptCountries={string.Join(',', exceptCountries)}"));
 
             return (await res.Deseralize<BlacklistContainer>()).Data;
         }
@@ -192,24 +218,44 @@ namespace AbuseIPDB
         ///     A comment describing the malicious activity.<br/>
         ///     This can be <see langword="null"/>, but it's best to provide a detailed reason.
         /// </param>
-        /// <returns>An instance of <see cref="ReportedIp"/> containing some information about the submitted report.</returns>
+        /// <returns>An instance of <see cref="ReportedIP"/> containing some information about the submitted report.</returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<ReportedIp> Report(string ip, IpReportCategory[] categories, string comment)
+        public async Task<ReportedIP> Report(string ip, IPReportCategory[] categories, string comment)
         {
             if (string.IsNullOrEmpty(ip)) throw new ArgumentNullException(nameof(ip), "IP address to use is null or empty.");
 
             HttpResponseMessage res = await Client.Request(
-                "report",
                 HttpMethod.Post,
-                JsonSerializer.Serialize(new IpReportPayload()
+                Config.ReportEndpoint ?? "report",
+                new IPReportParameters()
                 {
-                    IpAddress = ip,
+                    IPAddress = ip,
                     Categories = string.Join(',', categories.Select(x => (int)x)),
                     Comment = comment
-                }),
-                HttpStatusCode.OK);
+                },
+                absoluteUrl: Config.ReportEndpoint is not null);
 
-            return (await res.Deseralize<ReportedIpContainer>()).Data;
+            if (Config.CustomReportResponseConverter is not null) return await Config.CustomReportResponseConverter(res);
+            return (await res.Deseralize<ReportedIPContainer>()).Data;
+        }
+
+        /// <summary>
+        /// Bulk report many IP addresses at once. This endpoint has separate ratelimits and can accept up to <c>10,000</c> lines of CSV at once.<br/>
+        /// If you have a <see cref="byte"/> array or a <see cref="string"/> with the CSV data, you can convert it to a <see cref="MemoryStream"/> and pass that.
+        /// </summary>
+        /// <param name="csvStream">A <see cref="Stream"/> pointing to the CSV data. This can also be a <see cref="FileStream"/> or <see cref="MemoryStream"/>.</param>
+        /// <returns>An instance of <see cref="BulkReport"/> containing the summary of your bulk report.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public async Task<BulkReport> BulkReport(Stream csvStream)
+        {
+            if (csvStream is null) throw new ArgumentNullException(nameof(csvStream), "CSV stream to bulk report is null.");
+
+            HttpResponseMessage res = await Client.Request(
+                HttpMethod.Post, Config.BulkReportEndpoint ?? "bulk-report", csvStream, "csv", "reports.csv",
+                absoluteUrl: Config.BulkReportEndpoint is not null);
+
+            if (Config.CustomBulkReportResponseConverter is not null) return await Config.CustomBulkReportResponseConverter(res);
+            return (await res.Deseralize<BulkReportContainer>()).Data;
         }
 
         /// <summary>
@@ -224,25 +270,9 @@ namespace AbuseIPDB
             if (string.IsNullOrEmpty(network)) throw new ArgumentNullException(nameof(network), "Network to block check is null or empty.");
             if (maxAge <= 0) throw new ArgumentOutOfRangeException(nameof(maxAge), "Max age has to be a positive value.");
 
-            HttpResponseMessage res = await Client.Request($"check-block?network={network}&maxAgeInDays={maxAge}", HttpMethod.Get, target: HttpStatusCode.OK);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Get, $"check-block?network={network}&maxAgeInDays={maxAge}");
 
             return (await res.Deseralize<CheckedBlockContainer>()).Data;
-        }
-
-        /// <summary>
-        /// Bulk report many IP addresses at once. This endpoint has separate ratelimits and can accept up to <c>10,000</c> lines of CSV at once.<br/>
-        /// If you have a <see cref="byte"/> array or a <see cref="string"/> with the CSV data, you can convert it to a <see cref="MemoryStream"/> and pass that.
-        /// </summary>
-        /// <param name="csvStream">A <see cref="Stream"/> pointing to the CSV data. This can also be a <see cref="FileStream"/> or <see cref="MemoryStream"/>.</param>
-        /// <returns>An instance of <see cref="BulkReport"/> containing the summary of your bulk report.</returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public async Task<BulkReport> BulkReport(Stream csvStream)
-        {
-            if (csvStream is null) throw new ArgumentNullException(nameof(csvStream), "CSV stream to bulk report is null.");
-
-            HttpResponseMessage res = await Client.Request("bulk-report", HttpMethod.Post, csvStream, "csv", "reports.csv", HttpStatusCode.OK);
-
-            return (await res.Deseralize<BulkReportContainer>()).Data;
         }
 
         /// <summary>
@@ -255,7 +285,7 @@ namespace AbuseIPDB
         {
             if (string.IsNullOrEmpty(ip)) throw new ArgumentNullException(nameof(ip), "IP address to clear is null or empty.");
 
-            HttpResponseMessage res = await Client.Request($"clear-address?ipAddress={ip}", HttpMethod.Delete, target: HttpStatusCode.OK);
+            HttpResponseMessage res = await Client.Request(HttpMethod.Delete, $"clear-address?ipAddress={ip}");
 
             return (await res.Deseralize<ClearedAddressContainer>()).Data;
         }

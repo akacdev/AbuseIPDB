@@ -19,32 +19,35 @@ namespace AbuseIPDB
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
-            string url,
             HttpMethod method,
-            string json,
-            HttpStatusCode target = HttpStatusCode.OK)
-        => await Request(cl, url, method, new StringContent(json, Encoding.UTF8, "application/json"), target);
+            string url,
+            object obj,
+            HttpStatusCode target = HttpStatusCode.OK,
+            bool absoluteUrl = false)
+        => await Request(cl, method, url, new StringContent(JsonSerializer.Serialize(obj), Encoding.UTF8, "application/json"), target, absoluteUrl: absoluteUrl);
 
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
-            string url,
             HttpMethod method,
+            string url,
             Stream stream,
             string fieldName,
             string fileName,
-            HttpStatusCode target = HttpStatusCode.OK)
-        => await Request(cl, url, method, new StreamContent(stream), target, fieldName, fileName);
+            HttpStatusCode target = HttpStatusCode.OK,
+            bool absoluteUrl = false)
+        => await Request(cl, method, url, new StreamContent(stream), target, fieldName, fileName, absoluteUrl);
 
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
-            string path,
             HttpMethod method,
+            string url,
             HttpContent content = null,
             HttpStatusCode target = HttpStatusCode.OK,
             string fieldName = null,
-            string fileName = null)
+            string fileName = null,
+            bool absoluteUrl = false)
         {
             int retries = 0;
 
@@ -52,7 +55,7 @@ namespace AbuseIPDB
 
             while (res is null || !target.HasFlag(res.StatusCode) && retries < MaxRetries)
             {
-                HttpRequestMessage req = new(method, path);
+                HttpRequestMessage req = new(method, absoluteUrl ? url : string.Concat(AbuseIPDBClient.BaseUrl, url));
 
                 if (content is not StreamContent) req.Content = content;
                 else req.Content = new MultipartFormDataContent()
@@ -63,7 +66,7 @@ namespace AbuseIPDB
                 res = await cl.SendAsync(req);
 
                 MediaTypeHeaderValue contentType = res.Content.Headers.ContentType;
-                if (contentType.MediaType != "application/json")
+                if (!absoluteUrl && contentType.MediaType != "application/json")
                 {
                     bool includePreview = contentType.MediaType.StartsWith("text/");
                     string preview = null;
@@ -86,12 +89,12 @@ namespace AbuseIPDB
             if (!target.HasFlag(res.StatusCode))
             {
                 AbuseIPDBError[] errors = (await res.Deseralize<AbuseIPDBErrorContainer>())?.Errors;
-                if (errors is null) throw new AbuseIPDBException($"Failed to request {method} {path}, expected one of the following status codes: {string.Join(", ", res.StatusCode.GetFlags())} but received {res.StatusCode}");
+                if (errors is null) throw new AbuseIPDBException($"Failed to request {method} {url}, expected one of the following status codes: {string.Join(", ", res.StatusCode.GetFlags())} but received {res.StatusCode}");
 
                 string suffix = errors.Length == 1 ? "" : "s";
 
                 StringBuilder sb = new();
-                sb.AppendLine($"Failed to request {method} {path}, received {errors.Length} API error{suffix}.");
+                sb.AppendLine($"Failed to request {method} {url}, received {errors.Length} API error{suffix}.");
                 for (int i = 0; i < errors.Length; i++)
                 {
                     AbuseIPDBError error = errors[i];

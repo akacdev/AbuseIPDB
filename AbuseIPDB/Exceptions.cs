@@ -17,14 +17,7 @@ namespace AbuseIPDB
         /// </summary>
         public AbuseIPDBError[] Errors { get; set; }
 
-        public AbuseIPDBException(string message) : base(message)
-        {
-            Errors = Array.Empty<AbuseIPDBError>();
-        }
-
-        public AbuseIPDBException(string message, AbuseIPDBError[] errors) : base(message)
-        {
-            Errors = errors;
-        }
+        public AbuseIPDBException(string message) : base(message) => Errors = Array.Empty<AbuseIPDBError>();
+        public AbuseIPDBException(string message, AbuseIPDBError[] errors) : base(message) => Errors = errors;
     }
 }

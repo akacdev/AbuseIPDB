@@ -18,9 +18,9 @@ namespace Example
             AbuseIPDBClient client = new(key);
 
             Console.WriteLine($"> Checking IP address");
-            CheckedIp check = await client.Check("1.1.1.1", true, 90);
+            CheckedIP check = await client.Check("1.1.1.1", true, 90);
 
-            Console.WriteLine($"IP: {check.IpAddress}");
+            Console.WriteLine($"IP: {check.IPAddress}");
             Console.WriteLine($"Is Public: {check.IsPublic}");
             Console.WriteLine($"Is Whitelisted: {check.IsWhitelisted}");
             Console.WriteLine($"Abuse Confidence: {check.AbuseConfidence}%");
@@ -37,7 +37,7 @@ namespace Example
                 Console.WriteLine();
                 Console.WriteLine($"Preview of {check.Reports.Length} reports");
 
-                foreach (IpReport ipReport in check.Reports)
+                foreach (IPReport ipReport in check.Reports)
                 {
                     string preview = ipReport.Comment.Trim().Replace("\n", "");
                     Console.WriteLine($"Reported from {ipReport.ReporterCountryName} ({ipReport.ReporterCountryCode}){(string.IsNullOrEmpty(preview) ? "" : $" for '{preview}'")}");
@@ -46,30 +46,30 @@ namespace Example
 
             Console.WriteLine();
             Console.WriteLine($"> Requesting up to the first 300 reports of an IP");
-            IpReport[] reports = await client.GetReports("91.240.118.222", 300, 90);
+            IPReport[] reports = await client.GetReports("91.240.118.222", 300, 90);
 
             Console.WriteLine($"Received {reports.Length} reports, submitted from the following countries: {string.Join(", ", reports.Select(x => x.ReporterCountryCode).Distinct().OrderBy(x => x))}");
 
             Console.WriteLine();
             Console.WriteLine($"> Downloading a 10k IP blacklist and saving it into 'blacklist.txt'");
-            BlacklistedIp[] ips = await client.GetBlacklist(10000);
+            BlacklistedIP[] ips = await client.GetBlacklist(10000);
 
-            File.WriteAllLines("blacklist.txt", ips.Select(x => x.IpAddress));
-            
+            File.WriteAllLines("blacklist.txt", ips.Select(x => x.IPAddress));
+
             Console.WriteLine();
             Console.WriteLine($"> Reporting an IP address");
 
-            ReportedIp report;
+            ReportedIP report;
             try
             {
-                report = await client.Report("127.0.0.1", new IpReportCategory[] { IpReportCategory.WebSpam, IpReportCategory.SSH }, "Test Report");
-                Console.WriteLine($"Successfully reported {report.IpAddress}, abuse confidence score: {report.AbuseConfidence}");
+                report = await client.Report("127.0.0.1", new IPReportCategory[] { IPReportCategory.WebSpam, IPReportCategory.SSH }, "Test Report");
+                Console.WriteLine($"Successfully reported {report.IPAddress}, abuse confidence score: {report.AbuseConfidence}");
             }
             catch (AbuseIPDBException ex)
             {
                 Console.WriteLine($"Received an API exception while attempting to submit a report.");
 
-                if (ex.Errors is null) Console.WriteLine(ex.Message);
+                if (ex.Errors is null || ex.Errors.Length == 0) Console.WriteLine(ex.Message);
                 else
                 {
                     //API error enumeration so that you can easily programatically determine the type of error and act accordingly
@@ -92,19 +92,19 @@ namespace Example
 
             Console.WriteLine();
             Console.WriteLine($"> Checking a CIDR block for recently reported IP addresses");
-            CheckedBlock checkBlock = await client.CheckBlock("186.2.163.0/24", 30);
+            CheckedBlock checkedBlock = await client.CheckBlock("186.2.163.0/24", 30);
 
-            Console.WriteLine($"Network Address: {checkBlock.NetworkAddress}");
-            Console.WriteLine($"Netmask: {checkBlock.Netmask}");
-            Console.WriteLine($"Range: {checkBlock.MinAddress} - {checkBlock.MaxAddress}");
-            Console.WriteLine($"Possible Hosts: {checkBlock.PossibleHostCount}");
-            Console.WriteLine($"Address Space: {checkBlock.AddressSpace}");
+            Console.WriteLine($"Network Address: {checkedBlock.NetworkAddress}");
+            Console.WriteLine($"Netmask: {checkedBlock.Netmask}");
+            Console.WriteLine($"Range: {checkedBlock.MinAddress} - {checkedBlock.MaxAddress}");
+            Console.WriteLine($"Possible Hosts: {checkedBlock.PossibleHostCount}");
+            Console.WriteLine($"Address Space: {checkedBlock.AddressSpace}");
 
-            Console.WriteLine($"Reported Addresses: {checkBlock.ReportedIps.Length}");
-            for (int i = 0; i < checkBlock.ReportedIps.Length; i++)
+            Console.WriteLine($"Reported Addresses: {checkedBlock.ReportedIPs.Length}");
+            for (int i = 0; i < checkedBlock.ReportedIPs.Length; i++)
             {
-                CheckedBlockIp ip = checkBlock.ReportedIps[i];
-                Console.WriteLine($"[#{i + 1}] - {ip.IpAddress} with {ip.AbuseConfidence}% abuse confidence");
+                CheckBlockIP ip = checkedBlock.ReportedIPs[i];
+                Console.WriteLine($"[#{i + 1}] - {ip.IPAddress} with {ip.AbuseConfidence}% abuse confidence");
             }
 
             Console.WriteLine();
@@ -139,12 +139,13 @@ namespace Example
             int reportsDeleted = 0;
             for (int i = 1; i <= 5; i++)
             {
-                ClearedAddress clearAddress = await client.ClearAddress($"127.0.0.{i}");
-                reportsDeleted += clearAddress.ReportsDeleted;
+                ClearedAddress cleared = await client.ClearAddress($"127.0.0.{i}");
+                reportsDeleted += cleared.ReportsDeleted;
             }
 
             Console.WriteLine($"Successfully deleted {reportsDeleted} test reports.");
-            
+
+            Console.WriteLine("Demo finished");
             Console.ReadKey();
         }
     }
