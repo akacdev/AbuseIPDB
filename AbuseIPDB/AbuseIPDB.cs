@@ -31,12 +31,11 @@ namespace AbuseIPDB
         /// </summary>
         public static readonly Version HttpVersion = new(2, 0);
 
-        private readonly HttpClientHandler HttpHandler = new()
+        private readonly HttpClient Client = new(new HttpClientHandler()
         {
-            AutomaticDecompression = DecompressionMethods.All
-        };
+            AutomaticDecompression = DecompressionMethods.All,
 
-        private readonly HttpClient Client;
+        }) { DefaultRequestVersion = HttpVersion, BaseAddress = BaseUri };
 
         private readonly AbuseIPDBClientConfig Config;
 
@@ -54,11 +53,6 @@ namespace AbuseIPDB
 
             if (string.IsNullOrEmpty(Config.Key)) throw new ArgumentNullException(nameof(key), "An empty or null API Key was provided.");
 
-            Client = new(HttpHandler)
-            {
-                DefaultRequestVersion = HttpVersion
-            };
-
             InitializeClient();
         }
 
@@ -70,12 +64,6 @@ namespace AbuseIPDB
         {
             if (config is null) throw new ArgumentNullException(nameof(config), "Client config object is null.");
             Config = config;
-
-            Client = new(HttpHandler)
-            {
-                DefaultRequestVersion = HttpVersion,
-                BaseAddress = BaseUri
-            };
 
             InitializeClient();
         }

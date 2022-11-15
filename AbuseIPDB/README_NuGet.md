@@ -5,26 +5,33 @@
 An async C# library for interacting with the v2 AbuseIPDB API.
 
 ## Usage
-Available on NuGet as `AbuseIPDB`, methods can be found under the class `AbuseIPDBClient`.
+Provides an easy interface for interacting with the AbuseIPDB API. The most useful features is IP address reporting and checking.
 
-Create your own API key: https://www.abuseipdb.com/account/api
+To get started, add the library into your solution with either the `NuGet Package Manager` or the `dotnet` CLI.
+```rust
+dotnet add package AbuseIPDB
+```
 
-https://www.nuget.org/packages/AbuseIPDB
+For the primary classes to become available, import the used namespace.
+```csharp
+using AbuseIPDB;
+```
+
+An API key is required to interact with the API. Create your own key at: https://www.abuseipdb.com/account/api
+
+Need more examples? Under the `Example` directory you can find a working demo project that implements this library.
 
 ## Features
-- Made with **.NET 6**
+- Built for **.NET 6** and **.NET 7**
 - Fully **async**
 - Full coverage of the **FREE** and **Premium** v2 API
-- Deep **documentation**
+- Extensive **XML documentation**
 - **No external dependencies** (uses integrated HTTP and JSON)
 - Easily lookup IP addresses and **report abuse**
 - **Custom exceptions** (`AbuseIPDBException`) for advanced catching
 - Parsing of server errors
 - Automatic request retries
 - Example project to demonstrate all capabilities of the library
-
-## Example
-Under the `Example` directory you can find a working demo project that implements this library.
 
 ## Code Samples
 
@@ -77,7 +84,7 @@ ClearedAddress cleared = await client.ClearAddress("127.0.0.1");
 - Task\<IPReport[]> **GetReports**(string ip, int limit = 100, int maxAge = 90)
 - Task\<ReportedIP> **Report**(string ip, IPReportCategory[] categories, string comment)
 
-## Resources
-Website: https://www.abuseipdb.com
+## References
+- Official Website: https://www.abuseipdb.com
 
 *This is a community-ran library. Not affiliated with Marathon Studios, Inc.*

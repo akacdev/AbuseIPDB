@@ -9,10 +9,21 @@
 </div>
 
 ## Usage
-Available on NuGet as `AbuseIPDB`, methods can be found under the class `AbuseIPDBClient`.<br/>
-Create your own API key: https://www.abuseipdb.com/account/api
+Provides an easy interface for interacting with the AbuseIPDB API. The most useful features is IP address reporting and checking.
 
-https://www.nuget.org/packages/AbuseIPDB
+To get started, add the library into your solution with either the `NuGet Package Manager` or the `dotnet` CLI.
+```rust
+dotnet add package AbuseIPDB
+```
+
+For the primary classes to become available, import the used namespace.
+```csharp
+using AbuseIPDB;
+```
+
+An API key is required to interact with the API. Create your own key at: https://www.abuseipdb.com/account/api
+
+Need more examples? Under the `Example` directory you can find a working demo project that implements this library.
 
 ## Features
 - Made with **.NET 6**
@@ -25,9 +36,6 @@ https://www.nuget.org/packages/AbuseIPDB
 - Parsing of server errors
 - Automatic request retries
 - Example project to demonstrate all capabilities of the library
-
-## Example
-Under the `Example` directory you can find a working demo project that implements this library.
 
 ## Code Samples
 

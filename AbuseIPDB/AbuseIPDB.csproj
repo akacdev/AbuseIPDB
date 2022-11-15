@@ -1,24 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <!--Basic Information-->
+    <TargetFramework>net6.0;net7.0</TargetFramework>
     <PackageId>AbuseIPDB</PackageId>
     <Product>AbuseIPDB</Product>
-    <Version>1.2.0</Version>
-    <AssemblyVersion>1.2.0</AssemblyVersion>
-    <FileVersion>1.2.0</FileVersion>
     <Authors>akac</Authors>
     <Company>akac</Company>
     <Description>An async C# library for interacting with the v2 AbuseIPDB API.</Description>
     <PackageTags>abuseipdb; abuse; ip; ip-address; api; reporting; blacklist; blacklisting; webmaster; spam; anti-spam; hacking; ddos; phishing</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README_NuGet.md</PackageReadmeFile>
+
+    <!--Version-->
+    <Version>1.2.1</Version>
+    <AssemblyVersion>1.2.1</AssemblyVersion>
+    <FileVersion>1.2.1</FileVersion>
+
+    <!--Github-->
     <PackageProjectUrl>https://github.com/actually-akac/AbuseIPDB</PackageProjectUrl>
     <RepositoryUrl>https://github.com/actually-akac/AbuseIPDB</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon>icon.png</PackageIcon>
-    <NeutralLanguage>en</NeutralLanguage>
-    <PackageReadmeFile>README_NuGet.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+
+    <!--Compiler Options-->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    
+    <!--Miscellaneous-->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
+    <NeutralLanguage>en</NeutralLanguage>
+    
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
