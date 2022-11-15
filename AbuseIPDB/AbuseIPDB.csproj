@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!--Basic Information-->
-    <TargetFramework>net6.0;net7.0</TargetFramework>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
     <PackageId>AbuseIPDB</PackageId>
     <Product>AbuseIPDB</Product>
     <Authors>akac</Authors>
