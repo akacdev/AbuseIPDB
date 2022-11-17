@@ -26,10 +26,10 @@ An API key is required to interact with the API. Create your own key at: https:/
 Need more examples? Under the `Example` directory you can find a working demo project that implements this library.
 
 ## Features
-- Made with **.NET 6**
+- Built for **.NET 6** and **.NET 7**
 - Fully **async**
 - Full coverage of the **FREE** and **Premium** v2 API
-- Deep **documentation**
+- Extensive **XML documentation**
 - **No external dependencies** (uses integrated HTTP and JSON)
 - Easily lookup IP addresses and **report abuse**
 - **Custom exceptions** (`AbuseIPDBException`) for advanced catching
@@ -88,7 +88,7 @@ ClearedAddress cleared = await client.ClearAddress("127.0.0.1");
 - Task\<IPReport[]> **GetReports**(string ip, int limit = 100, int maxAge = 90)
 - Task\<ReportedIP> **Report**(string ip, IPReportCategory[] categories, string comment)
 
-## Resources
-Website: https://www.abuseipdb.com
+## References
+- Official Website: https://www.abuseipdb.com
 
 *This is a community-ran library. Not affiliated with Marathon Studios, Inc.*

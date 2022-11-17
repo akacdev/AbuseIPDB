@@ -15,27 +15,20 @@ namespace AbuseIPDB
     public class AbuseIPDBClient
     {
         /// <summary>
-        /// The version of the API to send requests to.
-        /// </summary>
-        public const int Version = 2;
-        /// <summary>
-        /// Base URL to send requests to.
-        /// </summary>
-        public static readonly string BaseUrl = $"https://api.abuseipdb.com/api/v{Version}/";
-        /// <summary>
         /// Base URI to send requests to.
         /// </summary>
-        public static readonly Uri BaseUri = new(BaseUrl);
-        /// <summary>
-        /// The HTTP version number to use when sending requests.
-        /// </summary>
-        public static readonly Version HttpVersion = new(2, 0);
+        public static readonly Uri BaseUri = new($"https://api.abuseipdb.com/api/v{Constants.Version}/");
 
-        private readonly HttpClient Client = new(new HttpClientHandler()
+        private static readonly HttpClientHandler HttpHandler = new()
         {
-            AutomaticDecompression = DecompressionMethods.All,
+            AutomaticDecompression = DecompressionMethods.All
+        };
 
-        }) { DefaultRequestVersion = HttpVersion, BaseAddress = BaseUri };
+        private readonly HttpClient Client = new(HttpHandler)
+        {
+            BaseAddress = BaseUri,
+            DefaultRequestVersion = new(2, 0)
+        };
 
         private readonly AbuseIPDBClientConfig Config;
 
@@ -71,7 +64,7 @@ namespace AbuseIPDB
         private void InitializeClient()
         {
             Client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
-            Client.DefaultRequestHeaders.UserAgent.ParseAdd("AbuseIPDB C# Client - actually-akac/AbuseIPDB");
+            Client.DefaultRequestHeaders.UserAgent.ParseAdd(Constants.UserAgent);
             Client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
             Client.DefaultRequestHeaders.Add("Key", Config.Key);
         }

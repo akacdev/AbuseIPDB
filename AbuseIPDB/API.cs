@@ -55,7 +55,7 @@ namespace AbuseIPDB
 
             while (res is null || !target.HasFlag(res.StatusCode) && retries < MaxRetries)
             {
-                HttpRequestMessage req = new(method, absoluteUrl ? url : string.Concat(AbuseIPDBClient.BaseUrl, url));
+                HttpRequestMessage req = new(method, absoluteUrl ? url : string.Concat(AbuseIPDBClient.BaseUri, url));
 
                 if (content is not StreamContent) req.Content = content;
                 else req.Content = new MultipartFormDataContent()
@@ -121,16 +121,19 @@ namespace AbuseIPDB
 
         public static async Task<T> Deseralize<T>(this HttpResponseMessage res, JsonSerializerOptions options = null)
         {
-            string json = await res.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(json)) throw new("Response content is empty, can't parse as JSON.");
-            
+            Stream stream = await res.Content.ReadAsStreamAsync();
+            if (stream.Length == 0) throw new AbuseIPDBException("Response content is empty, can't parse as JSON.");
+
             try
             {
-                return JsonSerializer.Deserialize<T>(json, options);
+                return await JsonSerializer.DeserializeAsync<T>(stream, options);
             }
             catch (Exception ex)
             {
-                throw new($"Exception while parsing JSON: {ex.GetType().Name} => {ex.Message}\nJSON preview: {json[..Math.Min(json.Length, PreviewMaxLength)]}");
+                using StreamReader sr = new(stream);
+                string text = await sr.ReadToEndAsync();
+
+                throw new AbuseIPDBException($"Exception while parsing JSON: {ex.GetType().Name} => {ex.Message}\nPreview: {text[..Math.Min(text.Length, PreviewMaxLength)]}");
             }
         }
     }
