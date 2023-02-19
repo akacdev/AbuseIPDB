@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AbuseIPDB
 {
-    public static class Extensions
+    internal static class Extensions
     {
         /// <summary>
         /// A small helper extension method to get all flags of an enum using LINQ.<br/>

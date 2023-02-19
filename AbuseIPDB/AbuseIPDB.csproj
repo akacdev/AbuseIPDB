@@ -10,12 +10,12 @@
     <Description>An async C# library for interacting with the v2 AbuseIPDB API.</Description>
     <PackageTags>abuseipdb; abuse; ip; ip-address; api; reporting; blacklist; blacklisting; webmaster; spam; anti-spam; hacking; ddos; phishing</PackageTags>
     <PackageIcon>icon.png</PackageIcon>
-    <PackageReadmeFile>README_NuGet.md</PackageReadmeFile>
+    <PackageReadmeFile>NuGet.md</PackageReadmeFile>
 
     <!--Version-->
-    <Version>1.2.2</Version>
-    <AssemblyVersion>1.2.2</AssemblyVersion>
-    <FileVersion>1.2.2</FileVersion>
+    <Version>1.2.3</Version>
+    <AssemblyVersion>1.2.3</AssemblyVersion>
+    <FileVersion>1.2.3</FileVersion>
 
     <!--Github-->
     <PackageProjectUrl>https://github.com/actually-akac/AbuseIPDB</PackageProjectUrl>
@@ -49,10 +49,6 @@
       <PackagePath>\</PackagePath>
     </None>
     <None Include="icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="README_NuGet.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

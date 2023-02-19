@@ -569,7 +569,7 @@ namespace AbuseIPDB
         /// <i>Source: AbuseIPDB</i>
         /// </summary>
         [JsonPropertyName("isWhitelisted")]
-        public bool IsWhitelisted { get; set; }
+        public bool? IsWhitelisted { get; set; }
 
         /// <summary>
         /// The abuse confidence score for this IP address as percentage.
@@ -629,7 +629,7 @@ namespace AbuseIPDB
         /// When the newest report for this IP address has been submitted.
         /// </summary>
         [JsonPropertyName("lastReportedAt")]
-        public DateTime LastReportedAt { get; set; }
+        public DateTime? LastReportedAt { get; set; }
 
         /// <summary>
         /// An array of <see cref="IPReport"/> containing the recent reports for this IP address. You can also use the <see cref="AbuseIPDBClient"/><c>.GetReports()</c> method.
