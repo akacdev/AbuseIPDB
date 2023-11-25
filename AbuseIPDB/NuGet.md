@@ -2,7 +2,7 @@
 
 ![](https://raw.githubusercontent.com/actually-akac/AbuseIPDB/master/AbuseIPDB/icon.svg)
 
-An async C# library for interacting with the v2 AbuseIPDB API.
+### An async C# library for interacting with the v2 AbuseIPDB API.
 
 ## Usage
 This library provides an easy interface for interacting with the v2 AbuseIPDB API.

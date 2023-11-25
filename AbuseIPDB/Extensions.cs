@@ -67,6 +67,7 @@ namespace AbuseIPDB
         /// <param name="stream">The HTTP response stream.</param>
         public static async Task<string> GetPreview(this Stream stream)
         {
+            stream.Position = 0;
             using StreamReader sr = new(stream);
 
             char[] buffer = new char[Math.Min(stream.Length, Constants.PreviewMaxLength)];
