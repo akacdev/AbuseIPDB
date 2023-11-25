@@ -39,11 +39,12 @@ namespace AbuseIPDB
         /// <param name="options">Optional JSON serialization options object.</param>
         public static async Task<StreamContent> Serialize(this object obj, JsonSerializerOptions options = null)
         {
-            using MemoryStream ms = new();
+            MemoryStream ms = new();
             await JsonSerializer.SerializeAsync(ms, obj, options);
+            ms.Position = 0;
 
             StreamContent sc = new(ms);
-            sc.Headers.ContentType = new("application/json; charset=utf-8");
+            sc.Headers.ContentType = new("application/json");
 
             return sc;
         }

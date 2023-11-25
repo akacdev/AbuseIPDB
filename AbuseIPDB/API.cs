@@ -51,6 +51,7 @@ namespace AbuseIPDB
             else req.Content = content;
 
             HttpResponseMessage res = await cl.SendAsync(req);
+            content?.Dispose();
 
             MediaTypeHeaderValue contentType = res.Content.Headers.ContentType;
             if (!absoluteUrl && contentType.MediaType != "application/json")
