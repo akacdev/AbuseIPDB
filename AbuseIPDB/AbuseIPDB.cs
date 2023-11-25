@@ -10,15 +10,10 @@ using System.Web;
 namespace AbuseIPDB
 {
     /// <summary>
-    /// The main class for interacting with he API. Create an instance of it by calling a constructor.
+    /// The primary class for interacting with he API. Create an instance of it by calling a constructor.
     /// </summary>
     public class AbuseIPDBClient
     {
-        /// <summary>
-        /// Base URI to send requests to.
-        /// </summary>
-        public static readonly Uri BaseUri = new($"https://api.abuseipdb.com/api/v{Constants.Version}/");
-
         private static readonly HttpClientHandler HttpHandler = new()
         {
             AutomaticDecompression = DecompressionMethods.All
@@ -26,8 +21,8 @@ namespace AbuseIPDB
 
         private readonly HttpClient Client = new(HttpHandler)
         {
-            BaseAddress = BaseUri,
-            DefaultRequestVersion = new(2, 0)
+            BaseAddress = Constants.BaseUri,
+            DefaultRequestVersion = Constants.HttpVersion
         };
 
         private readonly AbuseIPDBClientConfig Config;
@@ -39,12 +34,12 @@ namespace AbuseIPDB
         /// <exception cref="ArgumentNullException"></exception>
         public AbuseIPDBClient(string key)
         {
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key), "API key is null or empty.");
+
             Config = new()
             {
                 Key = key
             };
-
-            if (string.IsNullOrEmpty(Config.Key)) throw new ArgumentNullException(nameof(key), "An empty or null API Key was provided.");
 
             InitializeClient();
         }
@@ -52,10 +47,11 @@ namespace AbuseIPDB
         /// <summary>
         /// Create a new instance of the client for interacting with the API by passing an advanced <see cref="AbuseIPDBClientConfig"/> configuration object.
         /// </summary>
-        /// <param name="config"></param>
+        /// <param name="config">The configuration object with at least a key specified.</param>
         public AbuseIPDBClient(AbuseIPDBClientConfig config)
         {
             if (config is null) throw new ArgumentNullException(nameof(config), "Client config object is null.");
+            if (string.IsNullOrEmpty(config.Key)) throw new ArgumentNullException(nameof(config), "API key is null or empty.");
             Config = config;
 
             InitializeClient();
@@ -84,7 +80,7 @@ namespace AbuseIPDB
 
             HttpResponseMessage res = await Client.Request(
                 HttpMethod.Get,
-                $"check?ipAddress={HttpUtility.UrlEncode(ip)}&maxAgeInDays={maxAge}{(verbose ? "&verbose" : "")}");
+                $"check?ipAddress={ip.UrlEncode()}&maxAgeInDays={maxAge}{(verbose ? "&verbose" : "")}");
 
             return (await res.Deseralize<CheckedIPContainer>()).Data;
         }
@@ -114,9 +110,7 @@ namespace AbuseIPDB
             {
                 HttpResponseMessage res = await Client.Request(
                     HttpMethod.Get,
-                    $"reports?ipAddress={HttpUtility.UrlEncode(ip)}&maxAgeInDays={maxAge}&page={pageNumber}&perPage={perPage}",
-                    target: HttpStatusCode.OK
-                    );
+                    $"reports?ipAddress={HttpUtility.UrlEncode(ip)}&maxAgeInDays={maxAge}&page={pageNumber}&perPage={perPage}");
 
                 IPReportsPage page = (await res.Deseralize<IPReportsContainer>()).Data;
 
@@ -176,7 +170,8 @@ namespace AbuseIPDB
             string[] exceptCountries = null)
         {
             if (limit <= 0) throw new ArgumentOutOfRangeException(nameof(limit), "Limit has to be a positive value.");
-            if (confidenceMinimum.HasValue && (confidenceMinimum.Value < 0 || confidenceMinimum.Value > 100)) throw new ArgumentOutOfRangeException(nameof(confidenceMinimum), "Minimum confidence score has to be a valid percentage value.");
+            if (confidenceMinimum.HasValue && (confidenceMinimum.Value < 0 || confidenceMinimum.Value > 100))
+                throw new ArgumentOutOfRangeException(nameof(confidenceMinimum), "Minimum confidence score has to be a valid percentage value.");
 
             HttpResponseMessage res = await Client.Request(
                 HttpMethod.Get,
@@ -204,6 +199,7 @@ namespace AbuseIPDB
         public async Task<ReportedIP> Report(string ip, IPReportCategory[] categories, string comment)
         {
             if (string.IsNullOrEmpty(ip)) throw new ArgumentNullException(nameof(ip), "IP address to use is null or empty.");
+            if (categories is null) throw new ArgumentNullException(nameof(categories), "Categories are null.");
 
             HttpResponseMessage res = await Client.Request(
                 HttpMethod.Post,

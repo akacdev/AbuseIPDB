@@ -125,7 +125,7 @@ namespace AbuseIPDB
     }
 
     /// <summary>
-    /// Provides basic configuration options when initialising creating a client.
+    /// Provides configuration options when creating a client.
     /// </summary>
     public class AbuseIPDBClientConfig
     {
@@ -135,7 +135,7 @@ namespace AbuseIPDB
         public string Key { get; set; }
 
         /// <summary>
-        /// Specify the custom endpoint to request when reporting an IP address.
+        /// Specify a custom endpoint to request when reporting an IP address.
         /// </summary>
         public string ReportEndpoint { get; set; }
 
@@ -145,7 +145,7 @@ namespace AbuseIPDB
         public Func<HttpResponseMessage, Task<ReportedIP>> CustomReportResponseConverter { get; set; } = null;
 
         /// <summary>
-        /// Specify the custom endpoint to request when bulk-reporting IP addresses.
+        /// Specify a custom endpoint to request when bulk-reporting IP addresses.
         /// </summary>
         public string BulkReportEndpoint { get; set; }
 

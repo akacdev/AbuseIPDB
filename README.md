@@ -9,9 +9,10 @@
 </div>
 
 ## Usage
-Provides an easy interface for interacting with the AbuseIPDB API. The most useful features is IP address reporting and checking.
+This library provides an easy interface for interacting with the v2 AbuseIPDB API.
+You can use this on a server to automate your malicious IP adress reports or checks.
 
-To get started, add the library into your solution with either the `NuGet Package Manager` or the `dotnet` CLI.
+To get started, import the library into your solution with either the NuGet Package Manager or the dotnet CLI.
 ```rust
 dotnet add package AbuseIPDB
 ```
@@ -24,18 +25,23 @@ using AbuseIPDB;
 An API key is required to interact with the API. Create your own key at: https://www.abuseipdb.com/account/api
 
 Need more examples? Under the `Example` directory you can find a working demo project that implements this library.
+ 
+## Properties
+- Built for **.NET 8**, **.NET 7** and **.NET 6**
+- Fully **async**
+- Complete coverage of the **FREE** and **Premium** v2 API
+- Extensive **XML documentation**
+- **No external dependencies** (makes use of built-in `HttpClient` and `JsonSerializer`)
+- **Custom exceptions** (`AbuseIPDBException`) for easy debugging
+- Parsing of custom AbuseIPDB errors
+- Example project to demonstrate all capabilities of the library
 
 ## Features
-- Built for **.NET 6** and **.NET 7**
-- Fully **async**
-- Full coverage of the **FREE** and **Premium** v2 API
-- Extensive **XML documentation**
-- **No external dependencies** (uses integrated HTTP and JSON)
-- Easily lookup IP addresses and **report abuse**
-- **Custom exceptions** (`AbuseIPDBException`) for advanced catching
-- Parsing of server errors
-- Automatic request retries
-- Example project to demonstrate all capabilities of the library
+- Lookup an existing IP address details and see the confidence of abuse
+- Retrieve past reports
+- Download a calculated IP address blacklist file
+- Easily report malicious IP addresses attacking your server
+- Check reported IP addresses within an entire CIDR block
 
 ## Code Samples
 
@@ -79,16 +85,8 @@ CheckedBlock checkedBlock = await client.CheckBlock("186.2.163.0/24", 30);
 ClearedAddress cleared = await client.ClearAddress("127.0.0.1");
 ```
 
-## Available methods
-- Task\<BlacklistedIP[]> **GetBlacklist**( int limit = 10000, int? confidenceMinimum = null, string[] onlyCountries = null, string[] exceptCountries = null)
-- Task\<BulkReport> **BulkReport**(Stream csvStream)
-- Task\<ClearedAddress> **ClearAddress**(string ip)
-- Task\<CheckedBlock> **CheckBlock**(string network, int maxAge)
-- Task\<CheckedIP> **Check**(string ip, bool verbose = true, int maxAge = 90)
-- Task\<IPReport[]> **GetReports**(string ip, int limit = 100, int maxAge = 90)
-- Task\<ReportedIP> **Report**(string ip, IPReportCategory[] categories, string comment)
-
 ## References
-- Official Website: https://www.abuseipdb.com
+- Official website: https://www.abuseipdb.com
+- API docs: https://docs.abuseipdb.com
 
 *This is a community-ran library. Not affiliated with Marathon Studios, Inc.*

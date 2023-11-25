@@ -1,140 +1,94 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace AbuseIPDB
 {
-    public static class API
+    internal static class API
     {
-        public const int MaxRetries = 3;
-        public const int RetryDelay = 1000 * 3;
-        public const int ExtraDelay = 1000;
-        public const int PreviewMaxLength = 500;
-
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
             HttpMethod method,
-            string url,
+            string path,
             object obj,
-            HttpStatusCode target = HttpStatusCode.OK,
             bool absoluteUrl = false)
-        => await Request(cl, method, url, new StringContent(JsonSerializer.Serialize(obj), Encoding.UTF8, "application/json"), target, absoluteUrl: absoluteUrl);
+        => await Request(cl, method, path, await obj.Serialize(), absoluteUrl: absoluteUrl);
 
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
             HttpMethod method,
-            string url,
+            string path,
             Stream stream,
             string fieldName,
             string fileName,
-            HttpStatusCode target = HttpStatusCode.OK,
             bool absoluteUrl = false)
-        => await Request(cl, method, url, new StreamContent(stream), target, fieldName, fileName, absoluteUrl);
+        => await Request(cl, method, path, new StreamContent(stream), fieldName, fileName, absoluteUrl);
 
         public static async Task<HttpResponseMessage> Request
         (
             this HttpClient cl,
             HttpMethod method,
-            string url,
+            string path,
             HttpContent content = null,
-            HttpStatusCode target = HttpStatusCode.OK,
             string fieldName = null,
             string fileName = null,
             bool absoluteUrl = false)
         {
-            int retries = 0;
+            using HttpRequestMessage req = new(method, absoluteUrl ? path : string.Concat(Constants.BaseUri, path));
 
-            HttpResponseMessage res = null;
-
-            while (res is null || !target.HasFlag(res.StatusCode) && retries < MaxRetries)
+            if (!string.IsNullOrEmpty(fieldName) && !string.IsNullOrEmpty(fileName))
             {
-                HttpRequestMessage req = new(method, absoluteUrl ? url : string.Concat(AbuseIPDBClient.BaseUri, url));
-
-                if (content is not StreamContent) req.Content = content;
-                else req.Content = new MultipartFormDataContent()
+                req.Content = new MultipartFormDataContent()
                 {
                     { content, fieldName, fileName }
                 };
-
-                res = await cl.SendAsync(req);
-
-                MediaTypeHeaderValue contentType = res.Content.Headers.ContentType;
-                if (!absoluteUrl && contentType.MediaType != "application/json")
-                {
-                    bool includePreview = contentType.MediaType.StartsWith("text/");
-                    string preview = null;
-
-                    if (includePreview)
-                    {
-                        string data = await res.Content.ReadAsStringAsync();
-                        preview = $"\nPreview: {data[..Math.Min(data.Length, PreviewMaxLength)]}";
-                    }
-                    
-                    throw new AbuseIPDBException($"Expected response to be JSON, but received '{contentType.MediaType}'{preview}");
-                }
-
-                if (!target.HasFlag(res.StatusCode) && (int)res.StatusCode >= 500) await Task.Delay(RetryDelay);
-                else break;
-
-                retries++;
             }
+            else req.Content = content;
 
-            if (!target.HasFlag(res.StatusCode))
+            HttpResponseMessage res = await cl.SendAsync(req);
+
+            MediaTypeHeaderValue contentType = res.Content.Headers.ContentType;
+            if (!absoluteUrl && contentType.MediaType != "application/json")
             {
-                AbuseIPDBError[] errors = (await res.Deseralize<AbuseIPDBErrorContainer>())?.Errors;
-                if (errors is null) throw new AbuseIPDBException($"Failed to request {method} {url}, expected one of the following status codes: {string.Join(", ", res.StatusCode.GetFlags())} but received {res.StatusCode}");
+                bool includePreview = contentType.MediaType.StartsWith("text/");
+                string preview = includePreview ? $"\nPreview: {await res.GetPreview()}" : null;
 
-                string suffix = errors.Length == 1 ? "" : "s";
-
-                StringBuilder sb = new();
-                sb.AppendLine($"Failed to request {method} {url}, received {errors.Length} API error{suffix}.");
-                for (int i = 0; i < errors.Length; i++)
-                {
-                    AbuseIPDBError error = errors[i];
-                    error.Index = i;
-                    sb.Append($"[#{i + 1}] (Status Code: {error.Status}) {error.Detail}");
-
-                    if (error.Source is null || error.Source.Parameter is null) { sb.AppendLine(); continue; }
-                    sb.AppendLine($", source parameter: {error.Source.Parameter}");
-                }
-
-                AbuseIPDBException ex = new(sb.ToString(), errors);
-
-                if (res.StatusCode == HttpStatusCode.TooManyRequests)
-                {
-                    RetryConditionHeaderValue retry = res.Headers.RetryAfter;
-                    if (retry is not null) ex.RetryAfter = (int)retry.Delta.Value.TotalMilliseconds;
-                }
-
-                throw ex;
+                throw new AbuseIPDBException($"Expected response to be JSON, but received '{contentType.MediaType}'{preview}");
             }
 
-            return res;
-        }
+            if (res.IsSuccessStatusCode) return res;
 
-        public static async Task<T> Deseralize<T>(this HttpResponseMessage res, JsonSerializerOptions options = null)
-        {
-            Stream stream = await res.Content.ReadAsStreamAsync();
-            if (stream.Length == 0) throw new AbuseIPDBException("Response content is empty, can't parse as JSON.");
+            AbuseIPDBError[] errors = ((await res.Deseralize<AbuseIPDBErrorContainer>())?.Errors)
+                ?? throw new AbuseIPDBException($"Failed to request {method} {path}, received status code {res.StatusCode}");
 
-            try
+            string suffix = errors.Length == 1 ? "" : "s";
+            StringBuilder sb = new();
+            
+            sb.AppendLine($"Failed to request {method} {path}, received {errors.Length} API error{suffix}.");
+            for (int i = 0; i < errors.Length; i++)
             {
-                return await JsonSerializer.DeserializeAsync<T>(stream, options);
-            }
-            catch (Exception ex)
-            {
-                using StreamReader sr = new(stream);
-                string text = await sr.ReadToEndAsync();
+                AbuseIPDBError error = errors[i];
+                error.Index = i;
+                sb.Append($"[#{i + 1}] (status code: {error.Status}) {error.Detail}");
 
-                throw new AbuseIPDBException($"Exception while parsing JSON: {ex.GetType().Name} => {ex.Message}\nPreview: {text[..Math.Min(text.Length, PreviewMaxLength)]}");
+                if (error.Source is null || error.Source.Parameter is null) { sb.AppendLine(); continue; }
+                sb.AppendLine($", source parameter: {error.Source.Parameter}");
             }
+
+            AbuseIPDBException ex = new(sb.ToString(), errors);
+
+            if (res.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                RetryConditionHeaderValue retry = res.Headers.RetryAfter;
+                if (retry is not null) ex.RetryAfter = (int)retry.Delta.Value.TotalMilliseconds;
+            }
+
+            throw ex;
         }
     }
 }

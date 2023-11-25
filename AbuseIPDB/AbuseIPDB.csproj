@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!--Basic Information-->
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
     <PackageId>AbuseIPDB</PackageId>
     <Product>AbuseIPDB</Product>
     <Authors>akac</Authors>
@@ -27,12 +27,11 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    
+
     <!--Miscellaneous-->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RequireLicenseAcceptance>false</RequireLicenseAcceptance>
     <NeutralLanguage>en</NeutralLanguage>
-    
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -44,10 +43,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="icon.svg">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
     <None Include="icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
